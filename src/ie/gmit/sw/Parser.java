@@ -1,10 +1,7 @@
 package ie.gmit.sw;
 
 import java.io.*;
-import java.sql.DatabaseMetaData;
-import java.util.zip.InflaterInputStream;
-
-import javax.security.auth.callback.LanguageCallback;
+import java.util.*;
 
 
 public class Parser implements Runnable{
@@ -48,19 +45,35 @@ public class Parser implements Runnable{
 		}
 	}
 
-public static void main(String[] args) throws InterruptedException {
-		Parser p = new Parser("wili-2018-Small-11750-Edited.txt",5);
+
+public void analyseQuery(String file)throws IOException{
+	 
+	int kmers=0;
+	 int freq=1;
+	 
+	 String queryFile;
+	 
+	 Map<Integer, LanguageEntry> query = new HashMap<>();
+	 
+	 BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+	 
+	 while((queryFile = br.readLine())!=null){
 		
-		Database db = new Database();
-		p.setDb(db);
-		Thread t = new Thread();
-		t.start();
-		t.join();
-		
-		db.resize(300);
-		
-		
-	}
-	
-//analyse query
+		 for(int i=0; i <= queryFile.length() - k; i++) {
+				CharSequence charSeq = queryFile.substring(i, i+k);
+				kmers = charSeq.hashCode();
+			}
+		 
+		 if (query.containsKey(kmers)) {
+				freq += query.get(kmers).getFrequency();
+			}
+
+			LanguageEntry l = new LanguageEntry(kmers, freq);
+			query.put(kmers, l);
+	 }
+	 
+	 Language language = db.getLanguage(query);
+	 System.out.println("appears to be written in :"+language);
+}
+
 }
